@@ -1,0 +1,5 @@
+Asset ID,Asset Name,Category,Status,Company,Manufacturer,Model,Serial,Purchased on,Cost,Warranty,Supplier,Location,Username,Employee No.,Department,MAC Address,IPADDR,OS,RAM,HDD,Antivirus,Printer Type
+IMP-0001,Dell Latitude 5440,Laptop,Deployed,Acme Pvt Ltd,Dell,Latitude 5440,SN90010001,14/01/2025,85000,36,Acme Distributors,Chennai HQ,user@example.com,E1001,IT,AA:BB:CC:DD:EE:01,10.0.0.21,Windows 11 Pro,16 GB,512 GB SSD,Defender,
+IMP-0002,HP LaserJet Pro,Printer,Ready to Deploy,Acme Pvt Ltd,HP,M404dn,SN90010002,2024-06-30,24500,24,Acme Distributors,Bengaluru,,,Admin,,10.0.1.40,,,,,Laser
+IMP-0003,Cisco Catalyst 9200,Network Switch,Deployed,Acme Pvt Ltd,Cisco,C9200-24P,SN90010003,31/03/2024,"1,20,000",5 years,Acme Distributors,Mumbai,,,IT,,10.0.2.2,IOS-XE,,,,
+IMP-0004,Row with a problem,Laptop,Deployed,Acme Pvt Ltd,Lenovo,T14,SN90010004,not-a-date,50000,36,Acme Distributors,Chennai HQ,,,IT,,,,,,,
