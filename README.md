@@ -1,5 +1,6 @@
 # AssetDesk – ITSM Asset Portal
 
+
 A ManageEngine-style IT asset management portal.
 
 **Stack:** FastAPI + SQLAlchemy (SQLite by default) · React + Vite · JWT auth with roles
