@@ -62,7 +62,6 @@ export default function App() {
       <Route path="/login" element={user ? <Navigate to={home} replace /> : <Login />} />
       <Route element={<Protected roles={["admin", "technician"]} />}>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/assets/new" element={<AssetForm />} />
         <Route path="/assets/import" element={<ImportAssets />} />
         <Route path="/allocation" element={<Allocation />} />
         <Route path="/asset-ids" element={<AssetIds />} />

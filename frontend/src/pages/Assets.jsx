@@ -85,9 +85,6 @@ export default function Assets() {
             <Link className="btn" to="/assets/import">
               Import
             </Link>
-            <Link className="btn primary" to="/assets/new">
-              + Add asset
-            </Link>
           </div>
         )}
       </div>
