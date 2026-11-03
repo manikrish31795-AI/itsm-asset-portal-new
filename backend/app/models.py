@@ -162,3 +162,14 @@ class AuditItem(Base):
 
     audit: Mapped[Audit] = relationship(back_populates="items")
     asset: Mapped[Asset] = relationship(back_populates="audit_items")
+
+
+class AssetIdSeries(Base):
+    """One numbering series per category: Laptop -> L, Desktop -> D ... gives L-ESDS-0001, L-ESDS-0002 ..."""
+    __tablename__ = "asset_id_series"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    category_key: Mapped[str] = mapped_column(String(50), unique=True, index=True)  # lower-case category
+    category: Mapped[str] = mapped_column(String(50))
+    prefix: Mapped[str] = mapped_column(String(10), unique=True)
+    last_number: Mapped[int] = mapped_column(Integer, default=0)  # numbers are never re-used

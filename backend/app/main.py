@@ -11,7 +11,7 @@ from .database import Base, SessionLocal, engine
 from .models import Asset, AssetHistory, User
 from .allocation_service import backfill_allocations
 from .importer import migrate_audit_dates
-from .routers import allocations, assets, audits, dashboard, imports, users
+from .routers import allocations, asset_ids, assets, audits, dashboard, imports, users
 
 
 def seed():
@@ -92,6 +92,7 @@ app.include_router(imports.router)  # before assets: static paths must match bef
 app.include_router(assets.router)
 app.include_router(allocations.router)
 app.include_router(audits.router)
+app.include_router(asset_ids.router)
 app.include_router(dashboard.router)
 
 
