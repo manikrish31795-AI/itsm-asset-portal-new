@@ -91,6 +91,11 @@ export const api = {
     a.click();
     URL.revokeObjectURL(a.href);
   },
+  assetIdSeries: () => request("/asset-ids/series"),
+  assetIdPreview: (category) => request(`/asset-ids/preview${qs({ category })}`),
+  assetIdCheck: (params) => request(`/asset-ids/check${qs(params)}`),
+  assetIdRecent: () => request("/asset-ids/recent"),
+  createAssetId: (body) => request("/asset-ids", { method: "POST", body }),
   audits: (params) => request(`/audits${qs(params || {})}`),
   audit: (id) => request(`/audits/${id}`),
   auditPreview: (body) => request("/audits/preview", { method: "POST", body }),

@@ -191,6 +191,14 @@ button.stat:hover { border-color: #b7caf7; }
 .summary-grid strong { font-size: 20px; }
 .bulk-bar .actions { gap: 8px; }
 
+/* ---- asset id creation ---- */
+.id-banner { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: end; background: #f1f5fd; border-radius: 10px; padding: 14px 16px; }
+.id-big { font-size: 28px; font-weight: 700; letter-spacing: .02em; color: var(--brand-dark); font-variant-numeric: tabular-nums; }
+.id-done { border-color: #bfe5d0; background: #f3fbf7; }
+.id-done .id-big { color: var(--ok); font-size: 34px; }
+.series-table td { padding: 7px 10px; }
+.actions { flex-wrap: wrap; }
+
 @media print {
   .sidebar, .no-print { display: none !important; }
   .print-only { display: block; color: #000; }
@@ -211,6 +219,7 @@ button.stat:hover { border-color: #b7caf7; }
   .content { padding: 18px 14px; }
   .stats, .grid3, .grid2, .filters, .form-grid, .inline-form { grid-template-columns: 1fr; }
   .stats-6 { grid-template-columns: 1fr 1fr; }
+  .id-banner { grid-template-columns: 1fr; }
   .scan-row, .summary-grid { grid-template-columns: 1fr; }
   .loc-row { grid-template-columns: 1fr 70px; }
   .loc-row .progress { grid-column: 1 / -1; order: 3; }
