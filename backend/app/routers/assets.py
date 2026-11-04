@@ -39,8 +39,11 @@ def meta(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     }
 
 
-def _filtered(q: Optional[str], category: Optional[str], status: Optional[str], location: Optional[str]):
+def _filtered(q: Optional[str], category: Optional[str], status: Optional[str], location: Optional[str],
+              employee_no: Optional[str] = None):
     stmt = select(Asset)
+    if employee_no and employee_no.strip():
+        stmt = stmt.where(Asset.employee_no.ilike(f"%{employee_no.strip()}%"))  # Employee ID search
     if q:
         like = f"%{q}%"
         stmt = stmt.where(
@@ -48,7 +51,7 @@ def _filtered(q: Optional[str], category: Optional[str], status: Optional[str], 
                 Asset.name.ilike(like), Asset.asset_tag.ilike(like), Asset.serial_number.ilike(like),
                 Asset.model.ilike(like), Asset.manufacturer.ilike(like), Asset.hostname.ilike(like),
                 Asset.mac_address.ilike(like), Asset.ip_address.ilike(like), Asset.employee_no.ilike(like),
-                Asset.assigned_username.ilike(like), Asset.company.ilike(like),
+                Asset.assigned_username.ilike(like), Asset.company.ilike(like), Asset.manager.ilike(like),
             )
         )
     if category:
@@ -68,12 +71,13 @@ def list_assets(
     category: Optional[str] = None,
     status: Optional[str] = None,
     location: Optional[str] = None,
+    employee_no: Optional[str] = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=200),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    stmt = _filtered(q, category, status, location)
+    stmt = _filtered(q, category, status, location, employee_no)
     if user.role == "requester":  # requesters only see assets assigned to them
         stmt = stmt.where(Asset.assigned_to_id == user.id)
     total = db.scalar(select(func.count()).select_from(stmt.subquery()))
@@ -92,10 +96,11 @@ def export_csv(
     category: Optional[str] = None,
     status: Optional[str] = None,
     location: Optional[str] = None,
+    employee_no: Optional[str] = None,
     db: Session = Depends(get_db),
     _: User = Depends(require_roles("admin", "technician")),
 ):
-    rows = db.scalars(_filtered(q, category, status, location).options(selectinload(Asset.assigned_to))).all()
+    rows = db.scalars(_filtered(q, category, status, location, employee_no).options(selectinload(Asset.assigned_to))).all()
     extra_keys = sorted({k for a in rows for k in (a.attributes or {})}, key=str.lower)
 
     buf = io.StringIO()

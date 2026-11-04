@@ -47,7 +47,8 @@ def _base(kind, today, days, category=None, location=None, q=None):
     if q:
         like = f"%{q.strip().lower()}%"
         stmt = stmt.where(or_(func.lower(Asset.asset_tag).like(like), func.lower(Asset.name).like(like),
-                              func.lower(Asset.serial_number).like(like)))
+                              func.lower(Asset.serial_number).like(like), func.lower(Asset.employee_no).like(like),
+                              func.lower(Asset.hostname).like(like)))
     return stmt
 
 

@@ -257,6 +257,7 @@ def _items_filter(
         stmt = stmt.where(or_(
             AuditItem.asset_tag.ilike(like), AuditItem.asset_name.ilike(like), AuditItem.serial_number.ilike(like),
             AuditItem.expected_holder.ilike(like),
+            AuditItem.asset_id.in_(select(Asset.id).where(Asset.employee_no.ilike(like))),  # Employee ID
         ))
     if location:
         clause = location_clause(AuditItem.expected_location, [location])
