@@ -1,5 +1,6 @@
-import React from "react";
-import { NavLink, Navigate, Route, Routes, Outlet } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, Navigate, Route, Routes, Outlet, useLocation } from "react-router-dom";
+import { api } from "./api.js";
 import { useAuth } from "./auth.jsx";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
@@ -10,6 +11,7 @@ import ImportAssets from "./pages/ImportAssets.jsx";
 import Allocation from "./pages/Allocation.jsx";
 import AssetIds from "./pages/AssetIds.jsx";
 import Labels from "./pages/Labels.jsx";
+import Alerts from "./pages/Alerts.jsx";
 import Audits from "./pages/Audits.jsx";
 import AuditDetail from "./pages/AuditDetail.jsx";
 import Users from "./pages/Users.jsx";
@@ -24,6 +26,11 @@ function Protected({ roles }) {
 
 function Layout() {
   const { user, logout, isStaff, isAdmin } = useAuth();
+  const where = useLocation();
+  const [alertCount, setAlertCount] = useState(0);
+  useEffect(() => {
+    if (isStaff) api.alertSummary(60).then((s) => setAlertCount(s.total)).catch(() => {});
+  }, [isStaff, where.pathname]);
   return (
     <div className="shell">
       <aside className="sidebar">
@@ -33,6 +40,12 @@ function Layout() {
         <nav>
           {isStaff && <NavLink to="/dashboard">Dashboard</NavLink>}
           <NavLink to="/assets">Assets</NavLink>
+          {isStaff && (
+            <NavLink to="/alerts">
+              Alerts
+              {alertCount > 0 && <span className="nav-badge">{alertCount > 99 ? "99+" : alertCount}</span>}
+            </NavLink>
+          )}
           {isStaff && <NavLink to="/asset-ids">Asset ID</NavLink>}
           {isStaff && <NavLink to="/labels">Labels</NavLink>}
           {isStaff && <NavLink to="/allocation">Allocation</NavLink>}
@@ -68,6 +81,7 @@ export default function App() {
         <Route path="/allocation" element={<Allocation />} />
         <Route path="/asset-ids" element={<AssetIds />} />
         <Route path="/labels" element={<Labels />} />
+        <Route path="/alerts" element={<Alerts />} />
         <Route path="/audits" element={<Audits />} />
         <Route path="/audits/:id" element={<AuditDetail />} />
         <Route path="/assets/:id/edit" element={<AssetForm />} />

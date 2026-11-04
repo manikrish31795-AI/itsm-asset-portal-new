@@ -29,10 +29,12 @@ function BarList({ title, rows, filter }) {
 
 export default function Dashboard() {
   const [data, setData] = useState(null);
+  const [alerts, setAlerts] = useState(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
     api.dashboard().then(setData).catch((e) => setError(e.message));
+    api.alertSummary(60).then(setAlerts).catch(() => {});
   }, []);
 
   if (error) return <div className="alert">{error}</div>;
@@ -61,6 +63,31 @@ export default function Dashboard() {
           <strong>{data.warranty_expired}</strong>
         </div>
       </div>
+      {alerts && (
+        <div className="card">
+          <div className="bulk-bar">
+            <h3 style={{ margin: 0 }}>Needs attention <span className="muted small">(next 60 days)</span></h3>
+            <Link to="/alerts">See all alerts</Link>
+          </div>
+          <div className="attention">
+            {[
+              ["warranty_expiring", "Warranty expiring", "warn"],
+              ["warranty_expired", "Warranty expired", "danger"],
+              ["eol", "End of life", "warn"],
+              ["audit_due", "Audit due", "warn"],
+            ].map(([k, label, tone]) => (
+              <Link key={k} to={`/alerts?type=${k}&days=60`} className={`att ${alerts[k] ? tone : ""}`}>
+                <strong>{alerts[k]}</strong>
+                <span>{label}</span>
+              </Link>
+            ))}
+            <Link to="/audits" className={`att ${alerts.overdue_audits.length ? "danger" : ""}`}>
+              <strong>{alerts.overdue_audits.length}</strong>
+              <span>Overdue audits</span>
+            </Link>
+          </div>
+        </div>
+      )}
       <div className="grid3">
         <BarList title="By category" rows={data.by_category} filter="category" />
         <BarList title="By status" rows={data.by_status} filter="status" />

@@ -96,6 +96,17 @@ export const api = {
   assetIdCheck: (params) => request(`/asset-ids/check${qs(params)}`),
   assetIdRecent: () => request("/asset-ids/recent"),
   createAssetId: (body) => request("/asset-ids", { method: "POST", body }),
+  alertSummary: (days) => request(`/alerts/summary${qs({ days })}`),
+  alertItems: (params) => request(`/alerts/items${qs(params)}`),
+  exportAlerts: async (params) => {
+    const res = await request(`/alerts/export.csv${qs(params)}`, { raw: true });
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `alerts-${params.type}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  },
   audits: (params) => request(`/audits${qs(params || {})}`),
   audit: (id) => request(`/audits/${id}`),
   auditPreview: (body) => request("/audits/preview", { method: "POST", body }),
