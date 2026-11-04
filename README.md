@@ -1,6 +1,5 @@
 # AssetDesk – ITSM Asset Portal
 
-
 A ManageEngine-style IT asset management portal.
 
 **Stack:** FastAPI + SQLAlchemy (SQLite by default) · React + Vite · JWT auth with roles
@@ -26,6 +25,8 @@ A ManageEngine-style IT asset management portal.
   - **Progress** overall and per location; filter by result, location, category
   - **Close the audit**: verified assets get a "last audited" date, you choose whether unchecked assets stay as they are or become missing, whether assets found elsewhere get their location updated, and whether missing assets are marked Lost. A summary is kept and the full report exports to CSV
   - Each asset page shows its last audit date and audit history; imports understand "Last Audit" / "Next Audit Date" columns
+- **Asset ID tab** (admin / technician) – when an asset is purchased, enter its details and the asset ID is created automatically from the category: Laptop → `L-ESDS-0001`, Desktop → `D-ESDS-0001`, Mobile → `M-`, Server → `S-`, Network → `N-`, Peripheral → `P-`, Software → `SW-`, Other → `O-`. A new category gets its own letter automatically. Numbers run on per category and are never re-used. The asset is saved in the inventory as **In Stock**. A serial number, MAC address or hostname that already exists is refused (and warned about as you type), so the same asset can't be registered twice. After saving, the purchase details stay in the form so you can enter the next unit of the same order. Change the company code in `backend/app/asset_ids.py` (`COMPANY_CODE`)
+- **Labels tab** (admin / technician) – print QR-code or barcode labels for assets. Filter and tick assets (or "select all matching"), choose the label size (50×25 mm roll, 75×50 mm roll, A4 sheet 3×8 or 4×10), show/hide company name, asset name and location, set copies, and print. The code contains the asset ID, so scanning a label in an **Audit** marks the asset found. "Print label" buttons are also on the asset page and in the Asset ID tab (right after creating an ID, or for all recently created IDs). When printing set Scale = 100% and Margins = None
 - **Roles** – `admin` (everything), `technician` (manage assets, view dashboard), `requester` (sees only assets assigned to them)
 - **User management** (admin) – create users, change roles, deactivate
 
