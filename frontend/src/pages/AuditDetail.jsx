@@ -461,7 +461,7 @@ export default function AuditDetail() {
       )}
 
       <div className="filters filters-4">
-        <input placeholder="Search tag, name, serial, holder…" value={filters.q} onChange={(e) => setFilter("q", e.target.value)} />
+        <input placeholder="Search tag, name, serial, holder, employee ID…" value={filters.q} onChange={(e) => setFilter("q", e.target.value)} />
         <select aria-label="Result" value={filters.result} onChange={(e) => setFilter("result", e.target.value)}>
           {RESULT_FILTERS.map(([v, l]) => (
             <option key={v} value={v}>

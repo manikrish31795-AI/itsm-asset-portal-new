@@ -118,7 +118,7 @@ export default function Alerts() {
       </p>
 
       <div className="filters filters-3">
-        <input placeholder="Search tag, name, serial…" value={filters.q} onChange={(e) => setFilter("q", e.target.value)} />
+        <input placeholder="Search tag, name, serial, employee ID…" value={filters.q} onChange={(e) => setFilter("q", e.target.value)} />
         <select aria-label="Category" value={filters.category} onChange={(e) => setFilter("category", e.target.value)}>
           <option value="">All categories</option>
           {meta.categories.map((c) => (

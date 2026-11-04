@@ -25,7 +25,7 @@ const sections = (a) => [
       ["Location", a.location],
       ["Department", a.department],
       ["Assigned to", a.assigned_to?.full_name || a.assigned_username],
-      ["Employee no.", a.employee_no],
+      ["Employee ID", a.employee_no],
       ["Manager", a.manager],
       ["Job title", a.job_title],
       ["Allocated on", a.allocated_date],

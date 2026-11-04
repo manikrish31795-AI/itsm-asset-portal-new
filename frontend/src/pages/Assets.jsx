@@ -19,6 +19,7 @@ export default function Assets() {
   const filters = useMemo(
     () => ({
       q: sp.get("q") || "",
+      employee_no: sp.get("employee_no") || "",
       category: sp.get("category") || "",
       status: sp.get("status") || "",
       location: sp.get("location") || "",
@@ -89,11 +90,17 @@ export default function Assets() {
         )}
       </div>
 
-      <div className="filters filters-4">
+      <div className="filters filters-5">
         <input
-          placeholder="Search name, tag, serial, hostname, MAC, IP, user…"
+          placeholder="Search name, tag, serial, hostname…"
           value={filters.q}
           onChange={(e) => setFilter("q", e.target.value)}
+        />
+        <input
+          aria-label="Employee ID"
+          placeholder="Employee ID (e.g. 12345)"
+          value={filters.employee_no}
+          onChange={(e) => setFilter("employee_no", e.target.value)}
         />
         <select aria-label="Location" value={filters.location} onChange={(e) => setFilter("location", e.target.value)}>
           <option value="">All locations</option>
@@ -130,6 +137,7 @@ export default function Assets() {
               <th>Status</th>
               <th>Location</th>
               <th>Assigned to</th>
+              <th>Employee ID</th>
               <th>Warranty</th>
             </tr>
           </thead>
@@ -154,12 +162,13 @@ export default function Assets() {
                   )}
                 </td>
                 <td>{a.assigned_to?.full_name || a.assigned_username || "—"}</td>
+                <td className="nowrap">{a.employee_no || "—"}</td>
                 <td className="nowrap">{a.warranty_expiry || "—"}</td>
               </tr>
             ))}
             {!loading && data.items.length === 0 && (
               <tr>
-                <td colSpan="7" className="muted center">
+                <td colSpan="8" className="muted center">
                   No assets found{anyFilter ? " for these filters" : ""}
                 </td>
               </tr>
