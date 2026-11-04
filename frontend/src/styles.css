@@ -250,7 +250,12 @@ button.stat:hover { border-color: #b7caf7; }
 .lbl-co { font-size: 7pt; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .lbl-tag { font-size: 11pt; font-weight: 700; font-family: "Courier New", monospace; white-space: nowrap; }
 .lbl-name, .lbl-loc { font-size: 7.5pt; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lbl-tag.long { font-size: 8pt; white-space: normal; overflow-wrap: anywhere; }
+.lbl-tag.xl { font-size: 6.5pt; white-space: normal; overflow-wrap: anywhere; }
 .lbl.small .lbl-tag { font-size: 9pt; }
+.lbl.small .lbl-tag.long { font-size: 7pt; }
+.lbl.small .lbl-tag.xl { font-size: 5.5pt; }
+.lbl-top .lbl-tag { text-align: right; }
 .lbl.small .lbl-name, .lbl.small .lbl-loc { font-size: 6.5pt; }
 .lbl.bar { flex-direction: column; justify-content: center; gap: 1mm; }
 .lbl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; }

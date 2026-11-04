@@ -36,8 +36,12 @@ function Bars({ text }) {
   return <svg ref={ref} className="lbl-bars" preserveAspectRatio="none" />;
 }
 
+// long imported tags such as ESDS\BDC\LP\20202108\2991\001 get a smaller font and may wrap
+const tagSize = (t) => (t.length > 26 ? "xl" : t.length > 15 ? "long" : "");
+
 function Label({ asset, kind, layout, show }) {
   const small = layout.h < 30;
+  const tc = `lbl-tag ${tagSize(asset.asset_tag)}`;
   return (
     <div className={`lbl ${kind} ${small ? "small" : ""}`} style={{ width: `${layout.w}mm`, height: `${layout.h}mm` }}>
       {kind === "qr" ? (
@@ -45,7 +49,7 @@ function Label({ asset, kind, layout, show }) {
           <Qr text={asset.asset_tag} />
           <div className="lbl-text">
             {show.company && <div className="lbl-co">{show.company}</div>}
-            <div className="lbl-tag">{asset.asset_tag}</div>
+            <div className={tc}>{asset.asset_tag}</div>
             {show.name && <div className="lbl-name">{asset.name}</div>}
             {show.location && asset.location && <div className="lbl-loc">{asset.location}</div>}
           </div>
@@ -54,7 +58,7 @@ function Label({ asset, kind, layout, show }) {
         <>
           <div className="lbl-top">
             {show.company && <span className="lbl-co">{show.company}</span>}
-            <span className="lbl-tag">{asset.asset_tag}</span>
+            <span className={tc}>{asset.asset_tag}</span>
           </div>
           <Bars text={asset.asset_tag} />
           {(show.name || show.location) && (
@@ -188,7 +192,7 @@ export default function Labels() {
             </span>
             <div className="actions">
               <button className="btn" onClick={selectAllMatching} disabled={busy || !data.total}>
-                Select all {data.total} matching
+                {data.total > 1000 ? "Select first 1000 of " + data.total : `Select all ${data.total} matching`}
               </button>
               <button className="btn" onClick={() => setSelected({})} disabled={!list.length}>
                 Clear selection
