@@ -113,6 +113,9 @@ export default function AssetIds() {
             <button type="button" className="btn primary" onClick={copy}>
               {copied ? "Copied ✓" : "Copy ID"}
             </button>
+            <Link className="btn" to={`/labels?ids=${created.id}`}>
+              Print label
+            </Link>
             <Link className="btn" to={`/assets/${created.id}`}>
               View asset
             </Link>
@@ -210,7 +213,14 @@ export default function AssetIds() {
 
       <div className="grid2">
         <div className="card flush">
-          <h3 style={{ padding: "16px 18px 0" }}>Recently created IDs</h3>
+          <div className="bulk-bar" style={{ padding: "16px 18px 0" }}>
+            <h3 style={{ margin: 0 }}>Recently created IDs</h3>
+            {recent.length > 0 && (
+              <Link className="btn" to={`/labels?ids=${recent.map((r) => r.id).join(",")}`}>
+                Print labels for these
+              </Link>
+            )}
+          </div>
           <table>
             <thead>
               <tr>

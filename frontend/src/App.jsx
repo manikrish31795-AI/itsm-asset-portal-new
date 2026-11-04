@@ -9,6 +9,7 @@ import AssetDetail from "./pages/AssetDetail.jsx";
 import ImportAssets from "./pages/ImportAssets.jsx";
 import Allocation from "./pages/Allocation.jsx";
 import AssetIds from "./pages/AssetIds.jsx";
+import Labels from "./pages/Labels.jsx";
 import Audits from "./pages/Audits.jsx";
 import AuditDetail from "./pages/AuditDetail.jsx";
 import Users from "./pages/Users.jsx";
@@ -33,6 +34,7 @@ function Layout() {
           {isStaff && <NavLink to="/dashboard">Dashboard</NavLink>}
           <NavLink to="/assets">Assets</NavLink>
           {isStaff && <NavLink to="/asset-ids">Asset ID</NavLink>}
+          {isStaff && <NavLink to="/labels">Labels</NavLink>}
           {isStaff && <NavLink to="/allocation">Allocation</NavLink>}
           {isStaff && <NavLink to="/audits">Audit</NavLink>}
           {isAdmin && <NavLink to="/users">Users</NavLink>}
@@ -65,6 +67,7 @@ export default function App() {
         <Route path="/assets/import" element={<ImportAssets />} />
         <Route path="/allocation" element={<Allocation />} />
         <Route path="/asset-ids" element={<AssetIds />} />
+        <Route path="/labels" element={<Labels />} />
         <Route path="/audits" element={<Audits />} />
         <Route path="/audits/:id" element={<AuditDetail />} />
         <Route path="/assets/:id/edit" element={<AssetForm />} />

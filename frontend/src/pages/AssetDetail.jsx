@@ -108,6 +108,9 @@ export default function AssetDetail() {
         </div>
         {isStaff && (
           <div className="actions">
+            <Link className="btn" to={`/labels?ids=${id}`}>
+              Print label
+            </Link>
             <Link className="btn" to={`/assets/${id}/edit`}>
               Edit
             </Link>
