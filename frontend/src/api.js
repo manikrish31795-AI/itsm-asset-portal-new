@@ -107,6 +107,15 @@ export const api = {
     a.click();
     URL.revokeObjectURL(a.href);
   },
+  employees: (params) => request(`/employees${qs(params || {})}`),
+  employee: (key) => request(`/employees/profile${qs({ key })}`),
+  clearances: (params) => request(`/clearances${qs(params || {})}`),
+  clearance: (id) => request(`/clearances/${id}`),
+  startClearance: (body) => request("/clearances", { method: "POST", body }),
+  setClearanceItem: (id, itemId, body) => request(`/clearances/${id}/items/${itemId}`, { method: "PUT", body }),
+  allReturned: (id) => request(`/clearances/${id}/items/bulk-returned`, { method: "POST" }),
+  completeClearance: (id, body) => request(`/clearances/${id}/complete`, { method: "POST", body }),
+  cancelClearance: (id) => request(`/clearances/${id}/cancel`, { method: "POST" }),
   audits: (params) => request(`/audits${qs(params || {})}`),
   audit: (id) => request(`/audits/${id}`),
   auditPreview: (body) => request("/audits/preview", { method: "POST", body }),

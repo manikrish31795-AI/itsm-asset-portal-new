@@ -6,7 +6,7 @@ import { statusClass } from "./Assets.jsx";
 
 const money = (n) => (n != null ? `₹${Number(n).toLocaleString("en-IN")}` : null);
 
-const sections = (a) => [
+const sections = (a, isStaff) => [
   [
     "Identification",
     [
@@ -25,7 +25,7 @@ const sections = (a) => [
       ["Location", a.location],
       ["Department", a.department],
       ["Assigned to", a.assigned_to?.full_name || a.assigned_username],
-      ["Employee ID", a.employee_no],
+      ["Employee ID", a.employee_no && isStaff ? <Link to={`/employee?key=${encodeURIComponent("e:" + a.employee_no.trim().replace(/\s+/g, " ").toLowerCase())}`}>{a.employee_no}</Link> : a.employee_no],
       ["Manager", a.manager],
       ["Job title", a.job_title],
       ["Allocated on", a.allocated_date],
@@ -125,7 +125,7 @@ export default function AssetDetail() {
 
       <div className="grid2">
         <div>
-          {sections(asset).map(([title, fields]) => {
+          {sections(asset, isStaff).map(([title, fields]) => {
             const shown = fields.filter(([, v]) => v !== null && v !== undefined && v !== "");
             if (!shown.length) return null;
             return (

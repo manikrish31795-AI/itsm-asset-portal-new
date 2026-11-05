@@ -12,6 +12,10 @@ import Allocation from "./pages/Allocation.jsx";
 import AssetIds from "./pages/AssetIds.jsx";
 import Labels from "./pages/Labels.jsx";
 import Alerts from "./pages/Alerts.jsx";
+import Employees from "./pages/Employees.jsx";
+import Employee from "./pages/Employee.jsx";
+import Clearances from "./pages/Clearances.jsx";
+import Clearance from "./pages/Clearance.jsx";
 import Audits from "./pages/Audits.jsx";
 import AuditDetail from "./pages/AuditDetail.jsx";
 import Users from "./pages/Users.jsx";
@@ -48,6 +52,7 @@ function Layout() {
           )}
           {isStaff && <NavLink to="/asset-ids">Asset ID</NavLink>}
           {isStaff && <NavLink to="/labels">Labels</NavLink>}
+          {isStaff && <NavLink to="/employees">Employees</NavLink>}
           {isStaff && <NavLink to="/allocation">Allocation</NavLink>}
           {isStaff && <NavLink to="/audits">Audit</NavLink>}
           {isAdmin && <NavLink to="/users">Users</NavLink>}
@@ -82,6 +87,10 @@ export default function App() {
         <Route path="/asset-ids" element={<AssetIds />} />
         <Route path="/labels" element={<Labels />} />
         <Route path="/alerts" element={<Alerts />} />
+        <Route path="/employees" element={<Employees />} />
+        <Route path="/employee" element={<Employee />} />
+        <Route path="/clearances" element={<Clearances />} />
+        <Route path="/clearances/:id" element={<Clearance />} />
         <Route path="/audits" element={<Audits />} />
         <Route path="/audits/:id" element={<AuditDetail />} />
         <Route path="/assets/:id/edit" element={<AssetForm />} />

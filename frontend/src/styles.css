@@ -180,6 +180,7 @@ label small { font-weight: 400; }
 
 /* ---- location filter + audit ---- */
 .filters-4 { grid-template-columns: 2fr 1fr 1fr 1.2fr; }
+.filters-5 { grid-template-columns: 2fr 1.3fr 1.2fr 1fr 1fr; }
 .small { font-size: 12.5px; }
 .link-btn { background: none; border: 0; padding: 0; color: var(--brand); cursor: pointer; font: inherit; text-align: left; }
 .link-btn:hover { text-decoration: underline; }
@@ -283,6 +284,21 @@ button.stat:hover { border-color: #b7caf7; }
 .att.warn { background: #fff8ea; border-color: #f1dcae; } .att.warn strong { color: var(--warn); }
 .att.danger { background: #fff1f1; border-color: #efc4c4; } .att.danger strong { color: var(--danger); }
 
+/* ---- employees & clearance ---- */
+.emp-search { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.emp-search input.big { font-size: 17px; padding: 13px 14px; }
+.stats-3 { grid-template-columns: repeat(3, 1fr); }
+.filters-2 { grid-template-columns: 2fr 1fr; }
+.warnbox { background: #fff6e5; border-color: #f1dcae; color: #8a5a10; }
+.row-ok { background: #f6fcf9; }
+.row-bad { background: #fff6f6; }
+.decide { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.decide-extra { display: flex; gap: 8px; }
+.decide-extra select { width: auto; padding: 5px 8px; font-size: 13px; }
+.decide-notes { max-width: 340px; padding: 6px 10px; font-size: 13px; }
+.seg-toggle button.on.ok { background: var(--ok); }
+.seg-toggle button.on.bad { background: var(--danger); }
+
 @media print {
   .sidebar, .no-print { display: none !important; }
   .print-only { display: block; color: #000; }
@@ -303,6 +319,7 @@ button.stat:hover { border-color: #b7caf7; }
   .content { padding: 18px 14px; }
   .stats, .grid3, .grid2, .filters, .form-grid, .inline-form { grid-template-columns: 1fr; }
   .stats-6 { grid-template-columns: 1fr 1fr; }
+  .stats-3, .filters-2 { grid-template-columns: 1fr; }
   .attention { grid-template-columns: 1fr 1fr; }
   .filters-3 { grid-template-columns: 1fr; }
   .labels-layout { grid-template-columns: minmax(0, 1fr); }
