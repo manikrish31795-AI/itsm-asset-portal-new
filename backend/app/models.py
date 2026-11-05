@@ -173,3 +173,52 @@ class AssetIdSeries(Base):
     category: Mapped[str] = mapped_column(String(50))
     prefix: Mapped[str] = mapped_column(String(10), unique=True)
     last_number: Mapped[int] = mapped_column(Integer, default=0)  # numbers are never re-used
+
+
+class Clearance(Base):
+    """Exit / handover clearance: every asset an employee holds must be returned (or accounted for)."""
+    __tablename__ = "clearances"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    person_key: Mapped[str] = mapped_column(String(300), index=True)
+    employee_name: Mapped[str] = mapped_column(String(255))
+    employee_no: Mapped[str | None] = mapped_column(String(50), index=True)
+    department: Mapped[str | None] = mapped_column(String(100))
+    manager: Mapped[str | None] = mapped_column(String(255))
+    job_title: Mapped[str | None] = mapped_column(String(150))
+    reason: Mapped[str] = mapped_column(String(50), default="Resignation")
+    last_working_day: Mapped[dt.date | None] = mapped_column(Date)
+    notes: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(20), default="open", index=True)  # open | completed | cancelled
+    outcome: Mapped[str | None] = mapped_column(String(30))  # cleared | cleared_with_loss | not_cleared
+    created_by: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
+    completed_by: Mapped[str | None] = mapped_column(String(255))
+    completed_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
+
+    items: Mapped[list["ClearanceItem"]] = relationship(
+        back_populates="clearance", cascade="all, delete-orphan", order_by="ClearanceItem.id")
+
+
+class ClearanceItem(Base):
+    __tablename__ = "clearance_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    clearance_id: Mapped[int] = mapped_column(ForeignKey("clearances.id"), index=True)
+    allocation_id: Mapped[int] = mapped_column(ForeignKey("asset_allocations.id"))
+    asset_id: Mapped[int] = mapped_column(ForeignKey("assets.id"))
+    asset_tag: Mapped[str] = mapped_column(String(50))
+    asset_name: Mapped[str] = mapped_column(String(255))
+    category: Mapped[str] = mapped_column(String(50))
+    serial_number: Mapped[str | None] = mapped_column(String(100))
+    allocated_on: Mapped[dt.date | None] = mapped_column(Date)
+
+    result: Mapped[str] = mapped_column(String(20), default="pending")  # pending | returned | not_returned
+    return_status: Mapped[str | None] = mapped_column(String(30))  # In Stock / In Repair / Retired
+    condition: Mapped[str | None] = mapped_column(String(30))
+    notes: Mapped[str | None] = mapped_column(Text)
+    checked_by: Mapped[str | None] = mapped_column(String(255))
+    checked_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
+    final: Mapped[str | None] = mapped_column(String(20))  # set on completion: returned | lost | outstanding
+
+    clearance: Mapped[Clearance] = relationship(back_populates="items")

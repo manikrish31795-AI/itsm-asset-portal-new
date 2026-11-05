@@ -9,7 +9,7 @@ import datetime as dt
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from .models import Allocation, Asset, User
+from .models import Allocation, Asset, AssetHistory, User
 
 # Assets in these states cannot be handed to someone
 BLOCKED_STATUSES = ("retired", "lost", "in repair")
@@ -91,3 +91,21 @@ def backfill_allocations(db: Session) -> int:
             changed += 1
     db.commit()
     return changed
+
+
+def return_allocation(alloc: Allocation, status: str, on: dt.date, performer: str, notes: str | None) -> None:
+    """Close an allocation: the asset leaves the person, gets its new status and a history entry."""
+    asset = alloc.asset
+    alloc.returned_on, alloc.returned_by, alloc.return_status, alloc.return_notes = on, performer, status, notes
+    asset.assigned_to_id = None
+    asset.assigned_username = None
+    asset.employee_no = None
+    asset.manager = None
+    asset.job_title = None
+    asset.allocated_date = None
+    old_status = asset.status
+    asset.status = status
+    asset.history.append(AssetHistory(
+        action=f"Returned by {alloc.assignee_name}" + (f" (status {old_status} → {status})" if old_status != status else ""),
+        performed_by=performer,
+    ))

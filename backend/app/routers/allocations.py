@@ -8,7 +8,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
-from ..allocation_service import BLOCKED_STATUSES, find_portal_user, open_allocation
+from ..allocation_service import BLOCKED_STATUSES, find_portal_user, open_allocation, return_allocation
 from ..auth import require_roles
 from ..database import get_db
 from ..models import Allocation, Asset, AssetHistory, User
@@ -246,19 +246,6 @@ def return_assets(body: ReturnIn, db: Session = Depends(get_db), me: User = Depe
 
     notes = (body.notes or "").strip() or None
     for a in allocs:
-        asset = a.asset
-        a.returned_on, a.returned_by, a.return_status, a.return_notes = on, me.full_name, status, notes
-        asset.assigned_to_id = None
-        asset.assigned_username = None
-        asset.employee_no = None
-        asset.manager = None
-        asset.job_title = None
-        asset.allocated_date = None
-        old_status = asset.status
-        asset.status = status
-        asset.history.append(AssetHistory(
-            action=f"Returned by {a.assignee_name}" + (f" (status {old_status} → {status})" if old_status != status else ""),
-            performed_by=me.full_name,
-        ))
+        return_allocation(a, status, on, me.full_name, notes)
     db.commit()
     return sorted(allocs, key=lambda x: x.id)
