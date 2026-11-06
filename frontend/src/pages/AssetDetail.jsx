@@ -64,6 +64,7 @@ export default function AssetDetail() {
   const [error, setError] = useState("");
   const [allocs, setAllocs] = useState([]);
   const [audits, setAudits] = useState([]);
+  const [lics, setLics] = useState([]);
 
   useEffect(() => {
     api.asset(id).then(setAsset).catch((e) => setError(e.message));
@@ -77,6 +78,7 @@ export default function AssetDetail() {
   useEffect(() => {
     if (!isStaff) return;
     api.auditsOfAsset(id).then(setAudits).catch(() => {});
+    api.licensesOfAsset(id).then(setLics).catch(() => {});
   }, [id, isStaff]);
 
   const remove = async () => {
@@ -180,6 +182,19 @@ export default function AssetDetail() {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+        {isStaff && lics.length > 0 && (
+          <div className="card">
+            <h3>Software licences</h3>
+            {lics.map((l) => (
+              <div className="overdue-row" key={l.assignment_id}>
+                <Link to={`/licenses/${l.license_id}`}>
+                  <strong>{l.name}</strong>
+                </Link>
+                <span className="muted">{l.license_type}{l.renewal_date ? ` · renews ${l.renewal_date}` : ""}</span>
+              </div>
+            ))}
           </div>
         )}
         {isStaff && (

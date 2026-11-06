@@ -159,6 +159,23 @@ export default function Employee() {
           </table>
         </div>
 
+        {p.licenses.length > 0 && (
+          <>
+            <h3>Software licences</h3>
+            <div className="card">
+              {p.licenses.map((l) => (
+                <div className="overdue-row" key={l.assignment_id}>
+                  <Link to={`/licenses/${l.license_id}`}>
+                    <strong>{l.name}</strong>
+                  </Link>
+                  <span className="muted">since {l.assigned_on}{l.renewal_date ? ` · renews ${l.renewal_date}` : ""}</span>
+                </div>
+              ))}
+              <p className="muted small" style={{ margin: "8px 0 0" }}>These seats are freed automatically when an exit clearance is completed.</p>
+            </div>
+          </>
+        )}
+
         {p.clearances.length > 0 && (
           <>
             <h3>Exit clearances</h3>

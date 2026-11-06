@@ -22,21 +22,27 @@ export default function Employees() {
   const nav = useNavigate();
   const [q, setQ] = useState("");
   const [withAssets, setWithAssets] = useState(false);
+  const [location, setLocation] = useState("");
+  const [meta, setMeta] = useState({ locations: [] });
   const [data, setData] = useState({ items: [], total: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    api.assetMeta().then(setMeta).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
     const t = setTimeout(() => {
       api
-        .employees({ q, only_with_assets: withAssets ? "true" : "" })
+        .employees({ q, only_with_assets: withAssets ? "true" : "", location })
         .then((d) => { setData(d); setError(""); })
         .catch((e) => setError(e.message))
         .finally(() => setLoading(false));
     }, 250);
     return () => clearTimeout(t);
-  }, [q, withAssets]);
+  }, [q, withAssets, location]);
 
   const onEnter = (e) => {
     e.preventDefault();
@@ -63,9 +69,20 @@ export default function Employees() {
           onChange={(e) => setQ(e.target.value)}
           aria-label="Employee ID or name"
         />
+        <div className="emp-filters">
+          <select aria-label="Location" value={location} onChange={(e) => setLocation(e.target.value)}>
+            <option value="">All locations</option>
+            {meta.locations.map((l) => (
+              <option key={l.name} value={l.name}>
+                {l.name}
+              </option>
+            ))}
+            <option value="__none__">No location</option>
+          </select>
         <label className="check-row" style={{ margin: 0 }}>
           <input type="checkbox" checked={withAssets} onChange={(e) => setWithAssets(e.target.checked)} /> Only people who currently hold assets
         </label>
+        </div>
       </form>
       {error && <div className="alert">{error}</div>}
       <div className="card flush">
@@ -75,6 +92,7 @@ export default function Employees() {
               <th>Employee ID</th>
               <th>Name</th>
               <th>Department</th>
+              <th>Location</th>
               <th>Assets held</th>
               <th>Exit clearance</th>
             </tr>
@@ -89,6 +107,7 @@ export default function Employees() {
                   <Link to={profileLink(p.key)}>{p.name}</Link>
                 </td>
                 <td>{p.department || "—"}</td>
+                <td>{p.location || "—"}</td>
                 <td>
                   <span className="count">{p.active_count}</span>
                 </td>
@@ -105,7 +124,7 @@ export default function Employees() {
             ))}
             {!loading && data.items.length === 0 && (
               <tr>
-                <td colSpan="5" className="muted center">
+                <td colSpan="6" className="muted center">
                   No employee found{q ? ` for “${q}”` : ""}
                 </td>
               </tr>

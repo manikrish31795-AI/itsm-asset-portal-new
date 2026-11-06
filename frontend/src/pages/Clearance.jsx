@@ -97,7 +97,7 @@ function CompleteDialog({ c, onClose, onDone }) {
         <h3 style={{ margin: 0 }}>Complete clearance</h3>
         <div className="muted">
           {plural(n.returned, "asset")} will be returned to stock as you chose
-          {n.not_returned ? `, and ${plural(n.not_returned, "asset")} marked as not returned` : ""}. The assets then leave {c.employee_name}'s record. This cannot be undone.
+          {n.not_returned ? `, and ${plural(n.not_returned, "asset")} marked as not returned` : ""}. The assets then leave {c.employee_name}'s record and their software licence seats are freed. This cannot be undone.
         </div>
         {n.not_returned > 0 && (
           <div className="radio-col">
@@ -127,6 +127,7 @@ export default function Clearance() {
   const [c, setC] = useState(null);
   const [error, setError] = useState("");
   const [completing, setCompleting] = useState(false);
+  const [freed, setFreed] = useState(0);
 
   useEffect(() => {
     api.clearance(id).then(setC).catch((e) => setError(e.message));
@@ -195,7 +196,7 @@ export default function Clearance() {
             {c.outcome === "cleared" && <>Cleared – every asset has been returned.</>}
             {c.outcome === "cleared_with_loss" && <>Cleared with loss – some assets were not returned and are recorded as Lost.</>}
             {c.outcome === "not_cleared" && <><strong>Not cleared</strong> – {plural(outstanding.length, "asset")} still with the employee: {outstanding.map((i) => i.asset_tag).join(", ")}. Start a new clearance when they are returned.</>}
-            {" "}Completed by {c.completed_by}, {fmtTime(c.completed_at)}.
+            {" "}Completed by {c.completed_by}, {fmtTime(c.completed_at)}.{freed > 0 && ` ${plural(freed, "software licence seat")} freed.`}
           </div>
         )}
         {c.status === "cancelled" && <div className="alert">This clearance was cancelled. No asset was changed.</div>}
@@ -296,7 +297,7 @@ export default function Clearance() {
       )}
 
       {completing && (
-        <CompleteDialog c={c} onClose={() => setCompleting(false)} onDone={(x) => { setCompleting(false); setC(x); }} />
+        <CompleteDialog c={c} onClose={() => setCompleting(false)} onDone={(x) => { setCompleting(false); setFreed(x.licenses_released || 0); setC(x); }} />
       )}
     </>
   );

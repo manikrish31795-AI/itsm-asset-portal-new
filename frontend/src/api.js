@@ -116,6 +116,25 @@ export const api = {
   allReturned: (id) => request(`/clearances/${id}/items/bulk-returned`, { method: "POST" }),
   completeClearance: (id, body) => request(`/clearances/${id}/complete`, { method: "POST", body }),
   cancelClearance: (id) => request(`/clearances/${id}/cancel`, { method: "POST" }),
+  licenseMeta: () => request("/licenses/meta"),
+  licenses: (params) => request(`/licenses${qs(params || {})}`),
+  licenseSummary: () => request("/licenses/summary"),
+  license: (id) => request(`/licenses/${id}`),
+  createLicense: (body) => request("/licenses", { method: "POST", body }),
+  updateLicense: (id, body) => request(`/licenses/${id}`, { method: "PUT", body }),
+  deleteLicense: (id) => request(`/licenses/${id}`, { method: "DELETE" }),
+  assignLicense: (id, body) => request(`/licenses/${id}/assign`, { method: "POST", body }),
+  releaseLicense: (id, body) => request(`/licenses/${id}/release`, { method: "POST", body }),
+  licensesOfAsset: (assetId) => request(`/licenses/for-asset/${assetId}`),
+  exportLicenses: async (params) => {
+    const res = await request(`/licenses/export.csv${qs(params || {})}`, { raw: true });
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "licences.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  },
   audits: (params) => request(`/audits${qs(params || {})}`),
   audit: (id) => request(`/audits/${id}`),
   auditPreview: (body) => request("/audits/preview", { method: "POST", body }),

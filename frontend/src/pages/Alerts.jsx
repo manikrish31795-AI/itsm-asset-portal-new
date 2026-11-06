@@ -104,6 +104,23 @@ export default function Alerts() {
         </div>
       )}
 
+      {summary?.licence_renewals?.length > 0 && (
+        <div className="card">
+          <h3>Software licences due for renewal</h3>
+          {summary.licence_renewals.map((l) => (
+            <div className="overdue-row" key={l.id}>
+              <Link to={`/licenses/${l.id}`}>
+                <strong>{l.name}</strong>
+              </Link>
+              <span className="muted">
+                {l.used} of {l.seats} seats in use · {l.renewal_date}
+              </span>
+              <When d={l.days_left} />
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="stats">
         {TABS.map((t) => (
           <button key={t.key} type="button" className={`stat ${summary && summary[t.key] ? t.tone : ""} ${type === t.key ? "sel" : ""}`} onClick={() => go({ type: t.key })}>
