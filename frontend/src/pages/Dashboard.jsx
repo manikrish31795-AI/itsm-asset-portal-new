@@ -81,12 +81,12 @@ export default function Dashboard() {
                 <span>{label}</span>
               </Link>
             ))}
-            <Link to="/licenses?status=expiring" className={`att ${alerts.licence_renewals.length ? "warn" : ""}`}>
-              <strong>{alerts.licence_renewals.length}</strong>
+            <Link to="/licenses?status=expiring" className={`att ${(alerts.licence_renewals?.length || 0) ? "warn" : ""}`}>
+              <strong>{(alerts.licence_renewals?.length || 0)}</strong>
               <span>Licence renewals</span>
             </Link>
-            <Link to="/audits" className={`att ${alerts.overdue_audits.length ? "danger" : ""}`}>
-              <strong>{alerts.overdue_audits.length}</strong>
+            <Link to="/audits" className={`att ${(alerts.overdue_audits?.length || 0) ? "danger" : ""}`}>
+              <strong>{(alerts.overdue_audits?.length || 0)}</strong>
               <span>Overdue audits</span>
             </Link>
           </div>
