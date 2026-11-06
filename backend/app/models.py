@@ -186,6 +186,7 @@ class Clearance(Base):
     department: Mapped[str | None] = mapped_column(String(100))
     manager: Mapped[str | None] = mapped_column(String(255))
     job_title: Mapped[str | None] = mapped_column(String(150))
+    location: Mapped[str | None] = mapped_column(String(100), index=True)  # where the employee sits (from the assets held)
     reason: Mapped[str] = mapped_column(String(50), default="Resignation")
     last_working_day: Mapped[dt.date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
@@ -222,3 +223,49 @@ class ClearanceItem(Base):
     final: Mapped[str | None] = mapped_column(String(20))  # set on completion: returned | lost | outstanding
 
     clearance: Mapped[Clearance] = relationship(back_populates="items")
+
+
+class License(Base):
+    """A software licence: how many seats were bought, the key, and when it must be renewed."""
+    __tablename__ = "licenses"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(200), index=True)
+    publisher: Mapped[str | None] = mapped_column(String(150))
+    license_type: Mapped[str] = mapped_column(String(40), default="Subscription")
+    license_key: Mapped[str | None] = mapped_column(Text)
+    seats: Mapped[int] = mapped_column(Integer, default=1)
+    vendor: Mapped[str | None] = mapped_column(String(150))       # supplier / reseller
+    order_number: Mapped[str | None] = mapped_column(String(100))
+    purchase_date: Mapped[dt.date | None] = mapped_column(Date)
+    purchase_cost: Mapped[float | None] = mapped_column(Float)
+    renewal_date: Mapped[dt.date | None] = mapped_column(Date, index=True)  # empty = never expires (perpetual)
+    status: Mapped[str] = mapped_column(String(20), default="active", index=True)  # active | retired
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[str | None] = mapped_column(String(255))
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow)
+    updated_at: Mapped[dt.datetime] = mapped_column(DateTime, default=dt.datetime.utcnow, onupdate=dt.datetime.utcnow)
+
+    assignments: Mapped[list["LicenseAssignment"]] = relationship(
+        back_populates="license", cascade="all, delete-orphan", order_by="LicenseAssignment.id")
+
+
+class LicenseAssignment(Base):
+    """One seat in use: given to a person or installed on an asset. released_on is empty while the seat is in use."""
+    __tablename__ = "license_assignments"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    license_id: Mapped[int] = mapped_column(ForeignKey("licenses.id"), index=True)
+    kind: Mapped[str] = mapped_column(String(10))  # user | asset
+    asset_id: Mapped[int | None] = mapped_column(ForeignKey("assets.id"), index=True)
+    assignee_name: Mapped[str] = mapped_column(String(255))  # person's name, or "TAG · asset name"
+    employee_no: Mapped[str | None] = mapped_column(String(50), index=True)
+    person_key: Mapped[str] = mapped_column(String(300), index=True)  # e:<employee id> | n:<name> | a:<asset id>
+    assigned_on: Mapped[dt.date] = mapped_column(Date, default=dt.date.today)
+    released_on: Mapped[dt.date | None] = mapped_column(Date, index=True)
+    assigned_by: Mapped[str | None] = mapped_column(String(255))
+    released_by: Mapped[str | None] = mapped_column(String(255))
+    notes: Mapped[str | None] = mapped_column(Text)
+    release_notes: Mapped[str | None] = mapped_column(Text)
+
+    license: Mapped[License] = relationship(back_populates="assignments")

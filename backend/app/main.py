@@ -8,10 +8,10 @@ from sqlalchemy import func, inspect, select, text
 
 from .auth import hash_password
 from .database import Base, SessionLocal, engine
-from .models import Asset, AssetHistory, User
+from .models import Asset, AssetHistory, Clearance, User
 from .allocation_service import backfill_allocations
 from .importer import migrate_audit_dates
-from .routers import alerts, allocations, asset_ids, assets, audits, employees, dashboard, imports, users
+from .routers import alerts, allocations, asset_ids, assets, audits, employees, licenses, dashboard, imports, users
 
 
 def seed():
@@ -57,13 +57,18 @@ def seed():
 
 
 def ensure_columns():
-    """Tiny auto-migration: add columns introduced by newer versions to an existing database."""
-    existing = {c["name"] for c in inspect(engine).get_columns("assets")}
+    """Tiny auto-migration: add columns introduced by newer versions to existing tables."""
+    insp = inspect(engine)
     with engine.begin() as conn:
-        for col in Asset.__table__.columns:
-            if col.name not in existing:
-                ctype = col.type.compile(dialect=engine.dialect)
-                conn.execute(text(f'ALTER TABLE assets ADD COLUMN "{col.name}" {ctype}'))
+        for model in (Asset, Clearance):
+            table = model.__table__
+            if not insp.has_table(table.name):
+                continue
+            existing = {c["name"] for c in insp.get_columns(table.name)}
+            for col in table.columns:
+                if col.name not in existing:
+                    ctype = col.type.compile(dialect=engine.dialect)
+                    conn.execute(text(f'ALTER TABLE {table.name} ADD COLUMN "{col.name}" {ctype}'))
 
 
 @asynccontextmanager
@@ -94,6 +99,7 @@ app.include_router(allocations.router)
 app.include_router(audits.router)
 app.include_router(asset_ids.router)
 app.include_router(alerts.router)
+app.include_router(licenses.router)
 app.include_router(employees.router)
 app.include_router(employees.clearance_router)
 app.include_router(dashboard.router)

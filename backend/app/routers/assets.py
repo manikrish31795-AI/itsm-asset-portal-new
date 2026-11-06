@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy import or_, select, func
+from sqlalchemy import delete, or_, select, func
 from sqlalchemy.orm import Session, selectinload
 
 from ..allocation_service import sync_allocation
@@ -12,7 +12,7 @@ from ..auth import get_current_user, require_roles
 from ..constants import ASSET_COLUMNS, CATEGORIES, STATUSES
 from ..database import get_db
 from ..locations import location_clause, location_options
-from ..models import Asset, AssetHistory, User
+from ..models import Asset, AssetHistory, LicenseAssignment, User
 from ..schemas import AssetCreate, AssetDetail, AssetOut, AssetPage, AssetUpdate
 
 router = APIRouter(prefix="/api/assets", tags=["assets"])
@@ -181,5 +181,6 @@ def delete_asset(asset_id: int, db: Session = Depends(get_db), _: User = Depends
     asset = db.get(Asset, asset_id)
     if not asset:
         raise HTTPException(404, "Asset not found")
+    db.execute(delete(LicenseAssignment).where(LicenseAssignment.asset_id == asset_id))  # free its software seats
     db.delete(asset)
     db.commit()

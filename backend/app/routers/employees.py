@@ -11,7 +11,9 @@ from sqlalchemy.orm import Session, selectinload
 from ..allocation_service import return_allocation
 from ..auth import require_roles
 from ..database import get_db
+from ..locations import NO_LOCATION, norm as norm_loc
 from ..models import Allocation, Asset, Clearance, ClearanceItem, User
+from .licenses import licenses_of_person
 
 router = APIRouter(prefix="/api/employees", tags=["employees"])
 clearance_router = APIRouter(prefix="/api/clearances", tags=["clearances"])
@@ -24,6 +26,30 @@ CONDITIONS = ["Good", "Damaged", "Needs repair"]
 
 def _norm(v) -> str:
     return " ".join((v or "").split()).lower()
+
+
+def _top(counter: Counter):
+    return counter.most_common(1)[0][0] if counter else None
+
+
+def _top_location(counter: Counter):
+    """Most used location; spellings that differ only by case/spaces count as one place (the proper-cased one is shown)."""
+    merged: dict[str, Counter] = {}
+    for loc, n in counter.items():
+        merged.setdefault(norm_loc(loc), Counter())[loc] += n
+    if not merged:
+        return None
+    best = max(merged.values(), key=lambda c: sum(c.values()))
+    return max(best.items(), key=lambda kv: (kv[1], kv[0] != kv[0].lower()))[0]
+
+
+def _loc_match(value, wanted: Optional[str]) -> bool:
+    """Case/space-insensitive location filter; NO_LOCATION matches people without one."""
+    if not wanted:
+        return True
+    if wanted == NO_LOCATION:
+        return not norm_loc(value)
+    return norm_loc(value) == norm_loc(wanted)
 
 
 def _key(a: Allocation) -> str:
@@ -66,7 +92,7 @@ def _counts(c: Clearance) -> dict:
 def _clearance_out(db: Session, c: Clearance, with_items=True) -> dict:
     out = {
         "id": c.id, "person_key": c.person_key, "employee_name": c.employee_name, "employee_no": c.employee_no,
-        "department": c.department, "manager": c.manager, "job_title": c.job_title, "reason": c.reason,
+        "department": c.department, "manager": c.manager, "job_title": c.job_title, "location": c.location, "reason": c.reason,
         "last_working_day": c.last_working_day.isoformat() if c.last_working_day else None, "notes": c.notes,
         "status": c.status, "outcome": c.outcome, "created_by": c.created_by, "created_at": c.created_at.isoformat(),
         "completed_by": c.completed_by, "completed_at": c.completed_at.isoformat() if c.completed_at else None,
@@ -81,7 +107,8 @@ def _clearance_out(db: Session, c: Clearance, with_items=True) -> dict:
 
 # ------------------------------------------------------------------ employees
 @router.get("")
-def search(q: Optional[str] = None, only_with_assets: bool = False, limit: int = Query(50, ge=1, le=200),
+def search(q: Optional[str] = None, only_with_assets: bool = False, location: Optional[str] = None,
+           limit: int = Query(50, ge=1, le=200),
            db: Session = Depends(get_db), _: User = Depends(staff)):
     people: dict[str, dict] = {}
     for a in db.scalars(select(Allocation).options(selectinload(Allocation.asset))).all():
@@ -90,6 +117,9 @@ def search(q: Optional[str] = None, only_with_assets: bool = False, limit: int =
         p["total_count"] += 1
         if a.employee_no:
             p.setdefault("_spell", Counter())[" ".join(a.employee_no.split())] += 1
+        loc = " ".join((a.asset.location or "").split())
+        if loc:  # where they sit: the place of the assets they hold now (else of what they held before)
+            p.setdefault("_loc_now" if a.returned_on is None else "_loc_old", Counter())[loc] += 1
         if a.returned_on is None:
             p["active_count"] += 1
             p["name"] = a.assignee_name
@@ -97,11 +127,14 @@ def search(q: Optional[str] = None, only_with_assets: bool = False, limit: int =
     open_c = {c.person_key: c.id for c in db.scalars(select(Clearance).where(Clearance.status == "open")).all()}
     rows = list(people.values())
     for r in rows:
+        r["location"] = _top_location(r.pop("_loc_now", None) or Counter()) or _top_location(r.pop("_loc_old", None) or Counter())
+        r.pop("_loc_old", None)
         sp = r.pop("_spell", None)
         r["employee_no"] = sp.most_common(1)[0][0] if sp else None
         r["open_clearance_id"] = open_c.get(r["key"])
     if only_with_assets:
         rows = [r for r in rows if r["active_count"]]
+    rows = [r for r in rows if _loc_match(r["location"], location)]
     if q and q.strip():
         ql = _norm(q)
         rows = [r for r in rows if ql in _norm(r["name"]) or ql in _norm(r["employee_no"])]
@@ -138,8 +171,12 @@ def profile(key: str, db: Session = Depends(get_db), _: User = Depends(staff)):
         "name": first.assignee_name, "employee_no": emp_no, "department": dept[0][0] if dept else None,
         "manager": next((x.manager for x in assets if x.manager), None),
         "job_title": next((x.job_title for x in assets if x.job_title), None),
-        "location": next((x.location for x in assets if x.location), None),
+        "location": _top_location(Counter(" ".join(x.location.split()) for x in assets if x.location and x.location.strip())),
         "email": first.user.email if first.user else None,
+        "licenses": [{"assignment_id": l.id, "license_id": l.license.id, "name": l.license.name,
+                      "license_type": l.license.license_type, "assigned_on": l.assigned_on.isoformat(),
+                      "renewal_date": l.license.renewal_date.isoformat() if l.license.renewal_date else None}
+                     for l in licenses_of_person(db, f"e:{_norm(emp_no)}" if emp_no else first.person, emp_no)],
         "assets": [brief(a) for a in active],
         "history": [brief(a) for a in allocs if a.returned_on is not None],
         "clearances": [{"id": c.id, "status": c.status, "outcome": c.outcome, "reason": c.reason,
@@ -174,7 +211,7 @@ def start(body: StartIn, db: Session = Depends(get_db), me: User = Depends(staff
     if body.reason not in REASONS:
         raise HTTPException(422, f"Reason must be one of: {', '.join(REASONS)}")
     c = Clearance(person_key=prof["key"], employee_name=prof["name"], employee_no=prof["employee_no"],
-                  department=prof["department"], manager=prof["manager"], job_title=prof["job_title"], reason=body.reason,
+                  department=prof["department"], manager=prof["manager"], job_title=prof["job_title"], location=prof["location"], reason=body.reason,
                   last_working_day=body.last_working_day, notes=(body.notes or "").strip() or None, created_by=me.full_name)
     for a in sorted(_allocs_for(db, prof["key"], only_open=True), key=lambda x: x.asset.asset_tag.lower()):
         s = a.asset
@@ -187,15 +224,26 @@ def start(body: StartIn, db: Session = Depends(get_db), me: User = Depends(staff
 
 
 @clearance_router.get("")
-def list_clearances(status: str = "all", q: Optional[str] = None, db: Session = Depends(get_db), _: User = Depends(staff)):
+def list_clearances(status: str = "all", q: Optional[str] = None, location: Optional[str] = None,
+                    db: Session = Depends(get_db), _: User = Depends(staff)):
     stmt = select(Clearance).options(selectinload(Clearance.items)).order_by(Clearance.id.desc())
     if status != "all":
         stmt = stmt.where(Clearance.status == status)
     rows = db.scalars(stmt).all()
+    # clearances started before locations were stored: use where the assets are recorded now
+    legacy = [c for c in rows if not (c.location or "").strip() and c.items]
+    if legacy:
+        ids = {i.asset_id for c in legacy for i in c.items}
+        locs = {a.id: " ".join((a.location or "").split()) for a in db.scalars(select(Asset).where(Asset.id.in_(ids))).all()}
+        for c in legacy:
+            c.location = _top_location(Counter(locs.get(i.asset_id) for i in c.items if locs.get(i.asset_id)))
     if q and q.strip():
         ql = _norm(q)
         rows = [c for c in rows if ql in _norm(c.employee_name) or ql in _norm(c.employee_no)]
-    return [_clearance_out(db, c, with_items=False) for c in rows]
+    rows = [c for c in rows if _loc_match(c.location, location)]
+    out = [_clearance_out(db, c, with_items=False) for c in rows]
+    db.rollback()  # the derived locations above are for display only – never saved
+    return out
 
 
 def _get(db: Session, cid: int) -> Clearance:
@@ -275,10 +323,16 @@ def complete(cid: int, body: CompleteIn, db: Session = Depends(get_db), me: User
         else:
             i.final = "outstanding"
     finals = {i.final for i in c.items}
+    freed = 0
+    for seat in licenses_of_person(db, c.person_key, c.employee_no):  # the leaver's software seats become free again
+        seat.released_on, seat.released_by, seat.release_notes = today, me.full_name, note
+        freed += 1
     c.outcome = "not_cleared" if "outstanding" in finals else ("cleared_with_loss" if "lost" in finals else "cleared")
     c.status, c.completed_by, c.completed_at = "completed", me.full_name, dt.datetime.utcnow()
     db.commit()
-    return _clearance_out(db, _get(db, cid))
+    out = _clearance_out(db, _get(db, cid))
+    out["licenses_released"] = freed
+    return out
 
 
 @clearance_router.post("/{cid}/cancel")

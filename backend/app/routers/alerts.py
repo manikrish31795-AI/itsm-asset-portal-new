@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, selectinload
 from ..auth import require_roles
 from ..database import get_db
 from ..locations import location_clause
-from ..models import Asset, Audit, AuditItem, User
+from ..models import Asset, Audit, AuditItem, License, User
 
 router = APIRouter(prefix="/api/alerts", tags=["alerts"])
 staff = require_roles("admin", "technician")
@@ -73,8 +73,14 @@ def summary(days: int = Query(60, ge=1, le=730), db: Session = Depends(get_db), 
         total = db.scalar(select(func.count()).where(AuditItem.audit_id == a.id)) or 0
         overdue.append({"id": a.id, "name": a.name, "due_date": a.due_date.isoformat(),
                         "days_overdue": (today - a.due_date).days, "checked": done, "total": total})
-    return {"days": days, **counts, "overdue_audits": overdue,
-            "total": sum(counts.values()) + len(overdue)}
+    horizon = today + dt.timedelta(days=days)
+    due = [{"id": l.id, "name": l.name, "renewal_date": l.renewal_date.isoformat(), "days_left": (l.renewal_date - today).days,
+            "seats": l.seats, "used": sum(1 for a in l.assignments if a.released_on is None)}
+           for l in db.scalars(select(License).options(selectinload(License.assignments)).where(
+               License.status == "active", License.renewal_date.is_not(None), License.renewal_date <= horizon)
+               .order_by(License.renewal_date)).all()]
+    return {"days": days, **counts, "overdue_audits": overdue, "licence_renewals": due,
+            "total": sum(counts.values()) + len(overdue) + len(due)}
 
 
 @router.get("/items")
