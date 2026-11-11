@@ -116,6 +116,15 @@ export const api = {
   allReturned: (id) => request(`/clearances/${id}/items/bulk-returned`, { method: "POST" }),
   completeClearance: (id, body) => request(`/clearances/${id}/complete`, { method: "POST", body }),
   cancelClearance: (id) => request(`/clearances/${id}/cancel`, { method: "POST" }),
+  reportSummary: (params) => request(`/reports/summary${qs(params || {})}`),
+  exportReport: async (params) => {
+    const res = await request(`/reports/export.csv${qs(params || {})}`, { raw: true });
+    const blob = await res.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `assets-${params.report}.csv`;
+    a.click();
+  },
   licenseMeta: () => request("/licenses/meta"),
   licenses: (params) => request(`/licenses${qs(params || {})}`),
   licenseSummary: () => request("/licenses/summary"),

@@ -16,6 +16,7 @@ import Employees from "./pages/Employees.jsx";
 import Employee from "./pages/Employee.jsx";
 import Clearances from "./pages/Clearances.jsx";
 import Clearance from "./pages/Clearance.jsx";
+import Reports from "./pages/Reports.jsx";
 import Licenses from "./pages/Licenses.jsx";
 import LicenseForm from "./pages/LicenseForm.jsx";
 import LicenseDetail from "./pages/LicenseDetail.jsx";
@@ -56,6 +57,7 @@ function Layout() {
           {isStaff && <NavLink to="/asset-ids">Asset ID</NavLink>}
           {isStaff && <NavLink to="/labels">Labels</NavLink>}
           {isStaff && <NavLink to="/licenses">Licences</NavLink>}
+          {isStaff && <NavLink to="/reports">Reports</NavLink>}
           {isStaff && <NavLink to="/employees">Employees</NavLink>}
           {isStaff && <NavLink to="/allocation">Allocation</NavLink>}
           {isStaff && <NavLink to="/audits">Audit</NavLink>}
@@ -95,6 +97,7 @@ export default function App() {
         <Route path="/employee" element={<Employee />} />
         <Route path="/clearances" element={<Clearances />} />
         <Route path="/clearances/:id" element={<Clearance />} />
+        <Route path="/reports" element={<Reports />} />
         <Route path="/licenses" element={<Licenses />} />
         <Route path="/licenses/new" element={<LicenseForm />} />
         <Route path="/licenses/:id" element={<LicenseDetail />} />
