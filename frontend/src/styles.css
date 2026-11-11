@@ -369,3 +369,35 @@ th.r, td.r { text-align: right; }
 .rep-filter-line { display: none; margin-bottom: 10px; }
 @media (max-width: 900px) { .filters-rep { grid-template-columns: 1fr; } }
 @media print { .rep-filter-line { display: block; } .rep-bar { display: none; } }
+
+/* ---- data quality ---- */
+.dq-layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 18px; align-items: start; }
+.dq-list { padding: 8px 10px 12px; position: sticky; top: 12px; }
+.dq-list h4 { margin: 12px 8px 4px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.dq-check { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 10px; background: none; border: 0; border-radius: 8px; padding: 8px 10px; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.dq-check:hover { background: #f3f6fc; }
+.dq-check.active { background: #e8f0ff; color: var(--brand-dark); font-weight: 600; }
+.dq-count { min-width: 30px; text-align: center; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; background: #eceef2; color: #667085; }
+.dq-count.high { background: #fbe3e3; color: var(--danger); }
+.dq-count.medium { background: #fdf0d9; color: var(--warn); }
+.dq-count.low { background: #e8edf7; color: #35435f; }
+.dq-count.zero { background: #dff3e8; color: var(--ok); }
+.dq-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; }
+.dq-head h3 { margin: 0 0 4px; }
+.dq-head .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dq-sev.high { background: #fbe3e3; color: var(--danger); }
+.dq-sev.medium { background: #fdf0d9; color: var(--warn); }
+.dq-sev.low { background: #e8edf7; color: #35435f; }
+.dq-score.ok strong { color: var(--ok); }
+.dq-score.warn strong { color: var(--warn); }
+.dq-score.bad strong { color: var(--danger); }
+.dq-problem { color: #4a5675; font-size: 13px; }
+.dq-variant { margin: 2px 6px 2px 0; background: #fdf0d9; color: #7a5200; white-space: pre; }
+.dq-fix { display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.card.flush .pager { padding: 12px 16px; border-top: 1px solid var(--line); }
+@media (max-width: 900px) {
+  .dq-layout { grid-template-columns: minmax(0, 1fr); }
+  .dq-list { position: static; }
+  .card.flush { overflow-x: auto; }
+}
+@media print { .dq-layout { display: block; } .dq-detail table { font-size: 11px; } }
